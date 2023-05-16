@@ -1,21 +1,10 @@
 <template>
-<nav class="navbar">
-  <ul>
-  <li><a href="default.asp">Home</a></li>
-  <li><a href="news.asp">News</a></li>
-  <img alt="Vue logo" src="./assets/logo.png" id="logo">
-  <input type="text" placeholder="Search.." v-model="searchTerm">
- 
-  </ul>
-</nav>  
-
-  
+  <nav class="navbar">
+    <img alt="Vue logo" src="./assets/logo.png" id="logo">
+  </nav>
   <div id="content">
-    <ChampionGallery :searchTerm="searchTerm" @click="like()"/>
-  
-     
+    <ChampionGallery :searchTerm="searchTerm" @like="like" />
   </div>
-  {{championsdata}}
 </template>
 
 <script>
@@ -27,31 +16,33 @@ export default {
   components: {
     ChampionGallery
   },
-
   data() {
     return {
       LOLData: [],
-      championdata : [],
-       championsName: [],
-    searchTerm: '',
-    likedChampions: []
-  }
+      championdata: [],
+      championsName: [],
+      searchTerm: '',
+      favoris: [] // Array to store favorite champion names
+    }
   },
-
-  created : function() {
+  created: function () {
     this.retrieveLOLData()
   },
-  
   methods: {
     async retrieveLOLData() {
       this.LOLData = await getLOLData()
       this.championdata = this.LOLData["data"]
     },
-    like() {
-      
+    like(championName) {
+      if (this.favoris.includes(championName)) {
+        this.favoris = this.favoris.filter(name => name !== championName); // Remove the name if already exists
+      } else {
+        this.favoris.push(championName); // Add the champion's name to the 'favoris' array
+      }
+      console.log(this.favoris); // Log the 'favoris' array to the console
     }
-  }  
-}  
+  }
+}
 </script>
 
 <style>
@@ -73,7 +64,7 @@ body{
 
 
 #logo{
-  width: 10%;
+  width: 10em;
 }
 
 #content{
@@ -109,7 +100,6 @@ html,body{
   margin-top: 0;
   padding: 0;
 }
-
 
 
 </style>

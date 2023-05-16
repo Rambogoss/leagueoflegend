@@ -1,27 +1,34 @@
 <template>
   <div class="ChampionGallery">
     <div>
-      <p>Region: IONIA</p>
+      <p>Filtres</p>
       <input type="text" v-model="searchQuery" placeholder="Search..."><br><br>
       <div class="boutons">
-        <img src="../assets/Slayer_icon.png" :class="{ active: isSelectedFilter('Assassin') }" @click="toggleSelectedFilter('Assassin')">
-        <img src="../assets/Mage_icon.png" :class="{ active: isSelectedFilter('Mage') }" @click="toggleSelectedFilter('Mage')">
-        <img src="../assets/Tank_icon.png" :class="{ active: isSelectedFilter('Tank') }" @click="toggleSelectedFilter('Tank')">
-        <img src="../assets/Marksman_icon.png" :class="{ active: isSelectedFilter('Marksman') }" @click="toggleSelectedFilter('Marksman')">
-        <img src="../assets/Support_icon.png" :class="{ active: isSelectedFilter('Support') }" @click="toggleSelectedFilter('Support')">
-        <img src="../assets/Fighter_icon.png" :class="{ active: isSelectedFilter('Fighter') }" @click="toggleSelectedFilter('Fighter')">
+        <img src="../assets/heart2.png" data-tag="favoris" :class="{ active: showFavorites }" @click="toggleShowFavorites">
+        <img src="../assets/Slayer_icon.png" :data-tag="'Assassin'" :class="{ active: isSelectedFilter('Assassin') }" @click="toggleSelectedFilter('Assassin')">
+        <img src="../assets/Mage_icon.png" :data-tag="'Mage'" :class="{ active: isSelectedFilter('Mage') }" @click="toggleSelectedFilter('Mage')">
+        <img src="../assets/Tank_icon.png" :data-tag="'Tank'" :class="{ active: isSelectedFilter('Tank') }" @click="toggleSelectedFilter('Tank')">
+        <img src="../assets/Marksman_icon.png" :data-tag="'Marksman'" :class="{ active: isSelectedFilter('Marksman') }" @click="toggleSelectedFilter('Marksman')">
+        <img src="../assets/Support_icon.png" :data-tag="'Support'" :class="{ active: isSelectedFilter('Support') }" @click="toggleSelectedFilter('Support')">
+        <img src="../assets/Fighter_icon.png" :data-tag="'Fighter'" :class="{ active: isSelectedFilter('Fighter') }" @click="toggleSelectedFilter('Fighter')">
+
         <button :class="{ active: selectedFilter.length > 0 }" @click="clearSelectedFilter()">Clear</button>
+      
+        
       </div>
     </div>
     <br>
     <div class="champion-card-list">
-      <ChampionCard v-for="(champion, index) in filteredChampionsData"
+      <ChampionCard
+        v-for="(champion, index) in filteredChampionsData"
         :id="champion.id"
         :name="champion.name" 
         :tags="champion.tags"
         :short="champion.title"
         :description="champion.blurb"
-        :key="index"/> 
+        :key="index"
+        @like="emitLike(champion.name)"
+      />
     </div>
   </div>
 </template>
@@ -38,58 +45,78 @@ export default {
       LOLData: [],
       championsData: {},
       searchQuery: '',
-      selectedFilter: []
+      selectedFilter: [],
+      showFavorites: false // Flag to toggle displaying all champions or favorites only
     }
   },
-
   created: function () {
     this.retrieveLOLData()
   },
-
   computed: {
     filteredChampionsData() {
       const searchQuery = this.searchQuery.toLowerCase()
       const tagFilters = this.selectedFilter
-      return Object.values(this.championsData).filter(champion => {
+      let champions = Object.values(this.championsData)
+      if (this.showFavorites) {
+        // Filter only the favorites
+        champions = champions.filter(champion => this.$root.favoris.includes(champion.name))
+      }
+      return champions.filter(champion => {
         if (tagFilters.length > 0) {
-          return champion.name.toLowerCase().includes(searchQuery) && tagFilters.every(tag => champion.tags.includes(tag))
+          return (
+            champion.name.toLowerCase().includes(searchQuery) &&
+            tagFilters.every(tag => champion.tags.includes(tag))
+          );
         } else {
-          return champion.name.toLowerCase().includes(searchQuery)
+          return champion.name.toLowerCase().includes(searchQuery);
         }
       })
     }
   },
-
   methods: {
     async retrieveLOLData() {
       this.LOLData = await getLOLData()
       this.championsData = this.LOLData["data"]
     },
-
     isSelectedFilter(tag) {
       return this.selectedFilter.includes(tag);
     },
-
     toggleSelectedFilter(tag) {
-      if (this.selectedFilter.includes(tag)) {
-        this.selectedFilter = this.selectedFilter.filter(t => t !== tag);
-      } else {
-        this.selectedFilter.push(tag);
-      }
-      const img = event.target;
-    const currentOpacity = parseInt(img.style.opacity) || 30;
-    img.style.opacity = currentOpacity === 30 ? '100%' : '30%';
+  if (this.selectedFilter.includes(tag)) {
+    this.selectedFilter = this.selectedFilter.filter(t => t !== tag);
+  } else {
+    this.selectedFilter.push(tag);
+  }
+
+  // Update the opacity of the filter images except the favoris image
+  const images = document.querySelectorAll('.boutons img:not([data-tag="favoris"])');
+  images.forEach(img => {
+    const tag = img.dataset.tag;
+    const isActive = this.selectedFilter.includes(tag);
+    img.style.opacity = isActive ? '100%' : '30%';
+  });
+},
+    toggleShowFavorites() {
+  this.showFavorites = !this.showFavorites; // Toggle the flag to show all champions or favorites only
+
+  const image = document.querySelector('.boutons img[data-tag="favoris"]');
+  if (image) {
+    image.style.opacity = this.showFavorites ? '100%' : '30%';
+  }
+},
+    emitLike(championName) {
+      this.$emit('like', championName);
     },
-
     clearSelectedFilter() {
-  this.selectedFilter = [];
+      this.selectedFilter = [];
+      this.showFavorites = false; // Reset the showFavorites flag
 
-  // Get all images in the .boutons div and set their opacity to 30%
-  const images = document.querySelectorAll('.boutons img');
+      const images = document.querySelectorAll('.boutons img');
   images.forEach(img => {
     img.style.opacity = '30%';
   });
-}
+
+    }
   }
 }
 </script>
@@ -102,9 +129,6 @@ export default {
     justify-content: center;
   }
 
-  img:active{
-    opacity:100%;
-  }
 
   img {
 
@@ -112,5 +136,9 @@ export default {
     opacity: 30%;
   }
 
+  p {
+    margin-top: 2rem;
+    margin-bottom: 0.5em;
+  }
   
-</style>
+</style> 

@@ -1,21 +1,21 @@
 <template>
   <div class="ChampionCard" @mouseover="showDescription = true" @mouseleave="showDescription = false">
-    {{name}}<br>
-    {{short}}<br>
-    {{tags}}
-
+    <span :class="{ favoris: isFavorite }">{{ name }}</span><br>
+    {{ short }}<br>
+    {{ tags }}
     <br>
-   <img :src="`http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/${id}.png`" :alt="name" @click="like()" >
-
+    <img
+      :src="`http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/${id}.png`"
+      :alt="name"
+      @click="$emit('like', name)" 
+    >
     <div id="short">
-      <p v-show="showDescription"> Description : {{description}} </p>
+      <p v-show="showDescription"> Description: {{ description }} </p>
     </div>
   </div>
 </template>
 
-
 <script>
-
 export default {
   name: 'ChampionCard',
   props: {
@@ -23,26 +23,20 @@ export default {
     name: { type: String, required: true },
     short: { type: String, required: true },
     description: { type: String, required: true },
-    tags :{type: Array, required: true }
- 
+    tags: { type: Array, required: true }
+  },
+  computed: {
+    isFavorite() {
+      return this.$root.favoris.includes(this.name);
+    }
   },
   data() {
     return {
       showDescription: false
     }
-  },
-  methods: {
-    like() {
-  const img = event.target;
-  const currentOpacity = parseInt(img.style.opacity) || 30;
-  img.style.opacity = currentOpacity === 30 ? '100%' : '30%';
-
-
-}
   }
 }
 </script>
-
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
@@ -63,4 +57,18 @@ p:hover{
 
 
 
+img:hover {
+  border: 2px solid blue;
+  border-radius: 4px;
+  border-block-color: blueviolet;
+
+}
+
+.ChampionCard {
+  margin-bottom: 3em;
+}
+
+.favoris {
+  color: red; /* Change the color as desired */
+}
 </style>
