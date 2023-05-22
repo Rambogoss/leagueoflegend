@@ -1,9 +1,11 @@
 <template>
-  <nav class="navbar">
-    <img alt="Vue logo" src="./assets/logo.png" id="logo">
-  </nav>
-  <div id="content">
-    <ChampionGallery :searchTerm="searchTerm" @like="like" />
+  <div id="app">
+    <nav class="navbar">
+      <img alt="Vue logo" src="./assets/logo.png" id="logo">
+    </nav>
+    <div id="content">
+      <ChampionGallery :searchTerm="searchTerm" @like="like" />
+    </div>
   </div>
 </template>
 
@@ -18,28 +20,32 @@ export default {
   },
   data() {
     return {
-      LOLData: [],
-      championdata: [],
-      championsName: [],
       searchTerm: '',
-      favoris: [] // Array to store favorite champion names
+      favoris: [] 
     }
   },
-  created: function () {
-    this.retrieveLOLData()
+  created() {
+    this.retrieveLOLData();
+    this.loadFavorites();
   },
   methods: {
     async retrieveLOLData() {
-      this.LOLData = await getLOLData()
-      this.championdata = this.LOLData["data"]
+      const LOLData = await getLOLData();
+      this.championdata = LOLData.data;
+    },
+    loadFavorites() {
+      const favorites = localStorage.getItem('favorites');
+      if (favorites) {
+        this.favoris = JSON.parse(favorites);
+      }
     },
     like(championName) {
       if (this.favoris.includes(championName)) {
-        this.favoris = this.favoris.filter(name => name !== championName); // Remove the name if already exists
+        this.favoris = this.favoris.filter((name) => name !== championName);
       } else {
-        this.favoris.push(championName); // Add the champion's name to the 'favoris' array
+        this.favoris.push(championName);
       }
-      console.log(this.favoris); // Log the 'favoris' array to the console
+      localStorage.setItem('favorites', JSON.stringify(this.favoris)); 
     }
   }
 }
@@ -52,54 +58,32 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #bff4fd;
-  margin-top: 0em;
-
+  margin-top: 0;
 }
 
-
-
-body{
+body {
   background-color: rgb(20, 20, 20);
+  margin: 0;
 }
 
-
-#logo{
+#logo {
   width: 10em;
 }
 
-#content{
+#content {
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
 
-#nav{
-  margin-top: 0%;
-}
-#nav:hover{
-
-  background-color: blue;
-}
-
-ul{
-  display: flex;
-  justify-content: space-around;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.navbar{
+.navbar {
   background-color: #bff4fd;
   margin-top: 0;
   padding: 0;
   border: 0;
 }
 
-html,body{
-  margin-top: 0;
-  padding: 0;
+.champion-card-list {
+  background-color: rgba(0, 99, 180, 0.103);
 }
-
-
 </style>

@@ -1,8 +1,8 @@
 <template>
   <div class="ChampionCard" @mouseover="showDescription = true" @mouseleave="showDescription = false">
     <span :class="{ favoris: isFavorite }">{{ name }}</span><br>
-    {{ short }}<br>
-    {{ tags }}
+    <span :class="{ favoris: isFavorite }">{{ short }}</span><br>
+    <span class="tags">{{ tags }}</span>
     <br>
     <img
       :src="`http://ddragon.leagueoflegends.com/cdn/13.7.1/img/champion/${id}.png`"
@@ -10,7 +10,7 @@
       @click="$emit('like', name)" 
     >
     <div id="short">
-      <p v-show="showDescription"> Description: {{ description }} </p>
+      <p v-show="showDescription">Description: {{ description }}</p>
     </div>
   </div>
 </template>
@@ -37,12 +37,9 @@ export default {
   }
 }
 </script>
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+
 <style scoped>
 
-/* img{
-  width : 50%;
-} */
 p{
   text-justify: auto;
   text-align: justify;
@@ -55,13 +52,10 @@ p:hover{
   width: 20em;
 }
 
-
-
 img:hover {
   border: 2px solid blue;
   border-radius: 4px;
   border-block-color: blueviolet;
-
 }
 
 .ChampionCard {
@@ -69,6 +63,10 @@ img:hover {
 }
 
 .favoris {
-  color: red; /* Change the color as desired */
+  color: red; 
+}
+
+.tags {
+  color: grey;
 }
 </style>

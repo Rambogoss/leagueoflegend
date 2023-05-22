@@ -1,6 +1,6 @@
 <template>
   <div class="ChampionGallery">
-    <div>
+    <div class="filtres">
       <p>Filtres</p>
       <input type="text" v-model="searchQuery" placeholder="Search..."><br><br>
       <div class="boutons">
@@ -11,10 +11,7 @@
         <img src="../assets/Marksman_icon.png" :data-tag="'Marksman'" :class="{ active: isSelectedFilter('Marksman') }" @click="toggleSelectedFilter('Marksman')">
         <img src="../assets/Support_icon.png" :data-tag="'Support'" :class="{ active: isSelectedFilter('Support') }" @click="toggleSelectedFilter('Support')">
         <img src="../assets/Fighter_icon.png" :data-tag="'Fighter'" :class="{ active: isSelectedFilter('Fighter') }" @click="toggleSelectedFilter('Fighter')">
-
         <button :class="{ active: selectedFilter.length > 0 }" @click="clearSelectedFilter()">Clear</button>
-      
-        
       </div>
     </div>
     <br>
@@ -46,11 +43,12 @@ export default {
       championsData: {},
       searchQuery: '',
       selectedFilter: [],
-      showFavorites: false // Flag to toggle displaying all champions or favorites only
+      showFavorites: false 
     }
   },
   created: function () {
-    this.retrieveLOLData()
+    this.retrieveLOLData();
+    this.loadFavorites();
   },
   computed: {
     filteredChampionsData() {
@@ -58,7 +56,7 @@ export default {
       const tagFilters = this.selectedFilter
       let champions = Object.values(this.championsData)
       if (this.showFavorites) {
-        // Filter only the favorites
+        
         champions = champions.filter(champion => this.$root.favoris.includes(champion.name))
       }
       return champions.filter(champion => {
@@ -88,7 +86,7 @@ export default {
     this.selectedFilter.push(tag);
   }
 
-  // Update the opacity of the filter images except the favoris image
+
   const images = document.querySelectorAll('.boutons img:not([data-tag="favoris"])');
   images.forEach(img => {
     const tag = img.dataset.tag;
@@ -97,19 +95,27 @@ export default {
   });
 },
     toggleShowFavorites() {
-  this.showFavorites = !this.showFavorites; // Toggle the flag to show all champions or favorites only
+  this.showFavorites = !this.showFavorites; 
 
   const image = document.querySelector('.boutons img[data-tag="favoris"]');
   if (image) {
     image.style.opacity = this.showFavorites ? '100%' : '30%';
   }
 },
-    emitLike(championName) {
-      this.$emit('like', championName);
-    },
+    loadFavorites() {
+    const favorites = localStorage.getItem('favorites');
+    if (favorites) {
+      this.$root.favoris = JSON.parse(favorites); 
+    }
+  },
+
+  emitLike(championName) {
+    this.$emit('like', championName);
+    localStorage.setItem('favorites', JSON.stringify(this.$root.favoris)); 
+  },
     clearSelectedFilter() {
       this.selectedFilter = [];
-      this.showFavorites = false; // Reset the showFavorites flag
+      this.showFavorites = false; 
 
       const images = document.querySelectorAll('.boutons img');
   images.forEach(img => {
@@ -129,9 +135,7 @@ export default {
     justify-content: center;
   }
 
-
   img {
-
     height: 4em;
     opacity: 30%;
   }
